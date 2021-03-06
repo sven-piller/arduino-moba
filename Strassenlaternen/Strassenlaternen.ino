@@ -1,4 +1,5 @@
 /*
+
   Dieser Sketch ist für die Straßenbeleuchtung vorgesehen.
 
   Geplante Funktionsweise:
@@ -16,23 +17,23 @@
 */
 
 // Taster zum Ein-/Ausschalten
-const byte  taster = 2;
+const byte  TASTER_PIN = 2;
 // Ausgänge mit angeschlossenen LED-Straßenlampen
-const byte  lampen[] = {6, 8, 9, 10, 13};
+const byte  LAMPEN_PINS[] = {6, 8, 9, 10, 13};
 // Anzahl der Lampen
-const byte anzahl_lampen =  sizeof(lampen); //5
+const byte LAMPEN_ANZAHL =  sizeof(LAMPEN_PINS); //5
 
 // Aktueller Zustand der Lampen
-bool sind_lampen_an = false;
+bool sind_die_lampen_an = false;
 
 // Gibt es im aktuellen Zustand eine defekte Lampe
 bool defekteLampeVorhanden  = false;
 // Pin der defekten Lampe
-byte defekte_lampe;
+byte defekteLampePin;
 // Index der defekten Lampe im lampen-Array
-byte idx_defekte_lampe;
+byte defekteLampeIndex;
 // Flackerzeiten der defekten Lampe
-int flackerzeit_defekte_lampe;
+int defekteLampeFlackerzeit;
 
 int Pause1;
 int EinAus;
@@ -41,26 +42,26 @@ int EinAus;
 void setup() {
   Serial.begin(9600);
   // put your setup code here, to run once:
-  pinMode(taster, INPUT_PULLUP);
+  pinMode(TASTER_PIN, INPUT_PULLUP);
 
-  for (int i = 0; i < anzahl_lampen; i++) {
-    pinMode(lampen[i], OUTPUT);
-    digitalWrite(lampen[i], LOW);
+  for (int i = 0; i < LAMPEN_ANZAHL; i++) {
+    pinMode(LAMPEN_PINS[i], OUTPUT);
+    digitalWrite(LAMPEN_PINS[i], LOW);
   }
 }
 
 // Programmlogik
 void loop() {
 
-  if (digitalRead(taster) == LOW) {
+  if (digitalRead(TASTER_PIN) == LOW) {
     // Taste gedrückt
     Serial.print("Taste gedrueckt! ");
 
     // Status toggeln
-    if (sind_lampen_an == true) {
+    if (sind_die_lampen_an == true) {
       Serial.println("An => Aus");
-      sind_lampen_an = false;
-      AllesDunkel();
+      sind_die_lampen_an = false;
+      schalteAllesDunkel();
     } else {
       Serial.println("Aus => An");
 
@@ -70,58 +71,58 @@ void loop() {
 
       if (zufall > 50) {
         defekteLampeVorhanden = true;
-        BestimmeDefekteLampe();
+        bestimmeDefekteLampe();
         _printDefekteLampe();
       } else {
         defekteLampeVorhanden = false;
       }
 
-      sind_lampen_an = true;
-      BetriebLampen();
+      sind_die_lampen_an = true;
+      betreibeLampen();
     }
 
     // Taster entprellen
     delay(400);
   }
 
-  if (sind_lampen_an == true) {
-    BetriebLampen();
+  if (sind_die_lampen_an == true) {
+    betreibeLampen();
   } else {
-    AllesDunkel();
+    schalteAllesDunkel();
   }
 
 }
 
 // Schaltet alle Lampen auf LOW
-void AllesDunkel() {
+void schalteAllesDunkel() {
 
-  for (int i = 0; i < anzahl_lampen; i++) {
-    digitalWrite(lampen[i], LOW);
+  for (int i = 0; i < LAMPEN_ANZAHL; i++) {
+    digitalWrite(LAMPEN_PINS[i], LOW);
   }
 
 }
 
 // Schaltet alle Lampen ein
-void AllesLeuchtet() {
+void schalteAllesAn() {
 
-  for (int i = 0; i < anzahl_lampen; i++) {
-    digitalWrite(lampen[i], HIGH);
+  for (int i = 0; i < LAMPEN_ANZAHL; i++) {
+    digitalWrite(LAMPEN_PINS[i], HIGH);
   }
 
 }
 
 // Schaltet alle Lampen ein, inklusive der flackernden Lampe
-void BetriebLampen() {
+void betreibeLampen() {
 
   if (defekteLampeVorhanden == false) {
-    AllesLeuchtet();
+    schalteAllesAn();
   } else {
 
-    for (int i = 0; i < anzahl_lampen; i++) {
-      if (i == idx_defekte_lampe) {
-        BetriebFlackerndeLampe();
+    for (int i = 0; i < LAMPEN_ANZAHL; i++) {
+      if (i == defekteLampeIndex) {
+        betreibeFlackerndeLampe();
       } else {
-        digitalWrite(lampen[i], HIGH);
+        digitalWrite(LAMPEN_PINS[i], HIGH);
       }
     }
 
@@ -130,30 +131,30 @@ void BetriebLampen() {
 }
 
 /*
-   Sorgt für das Flackern der defekten Lampe
+  Sorgt für das Flackern der defekten Lampe
 
-   Wenn die Zählvariable größer als die aktuelle Pause ist,
-   dann wird der Status der Lampe getoggelt und eine neue
-   Zeitspanne gesetzt.
+  Wenn die Zählvariable größer als die aktuelle Pause ist,
+  dann wird der Status der Lampe getoggelt und eine neue
+  Zeitspanne gesetzt.
 */
-void BetriebFlackerndeLampe() {
+void betreibeFlackerndeLampe() {
 
   // aktuellen Zustand toggeln
-  if (digitalRead(defekte_lampe) == HIGH) {
-    digitalWrite(defekte_lampe, LOW);
-    flackerzeit_defekte_lampe = random(300, 1000);
+  if (digitalRead(defekteLampePin) == HIGH) {
+    digitalWrite(defekteLampePin, LOW);
+    defekteLampeFlackerzeit = random(300, 1000);
   } else {
-    digitalWrite(defekte_lampe, HIGH);
-    flackerzeit_defekte_lampe = random(5, 300);
+    digitalWrite(defekteLampePin, HIGH);
+    defekteLampeFlackerzeit = random(5, 300);
   }
 
   // Den Flackerzustand eine gewisse Zeit halten
-  for (int i = 0; i < flackerzeit_defekte_lampe; i++) {
+  for (int i = 0; i < defekteLampeFlackerzeit; i++) {
     delay(1);
 
     // Interupt, falls Taster in dieser Pause gedrückt wird
-    if ((digitalRead(taster)) == LOW) {
-      i = flackerzeit_defekte_lampe;
+    if ((digitalRead(TASTER_PIN)) == LOW) {
+      i = defekteLampeFlackerzeit;
     }
 
   }
@@ -161,30 +162,30 @@ void BetriebFlackerndeLampe() {
 }
 
 /*
-   Startet den Betrieb der Lampen
+  Startet den Betrieb der Lampen
 
-   Die Lampen sollen mit einer simulierten Flackerschaltung
-   angehen.
+  Die Lampen sollen mit einer simulierten Flackerschaltung
+  angehen.
 */
-void StarteLampen() {
+void starteLampen() {
 
 }
 
 // Defekte Lampe bestimmen
-void BestimmeDefekteLampe() {
+void bestimmeDefekteLampe() {
   randomSeed(analogRead(0));
-  idx_defekte_lampe = random(0, anzahl_lampen);
-  defekte_lampe = lampen[idx_defekte_lampe];
+  defekteLampeIndex = random(0, LAMPEN_ANZAHL);
+  defekteLampePin = LAMPEN_PINS[defekteLampeIndex];
 }
 
 /*
-   Debugausgaben für die Defekte Lampe
+  Debugausgaben für die Defekte Lampe
 */
 void _printDefekteLampe() {
   Serial.print("Defekte Lampe: #");
-  Serial.print(idx_defekte_lampe);
+  Serial.print(defekteLampeIndex);
   Serial.print(" => Lampe ");
-  Serial.print(lampen[idx_defekte_lampe]);
+  Serial.print(LAMPEN_PINS[defekteLampeIndex]);
   Serial.print(": ");
-  Serial.println(defekte_lampe);
+  Serial.println(defekteLampePin);
 }
