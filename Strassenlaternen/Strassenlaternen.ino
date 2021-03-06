@@ -19,7 +19,8 @@ byte lampen[] = {6, 8, 9, 10, 13};
 
 // Schaltet alle Lampen auf LOW
 void AllesDunkel() {
-  for (int i = 0; i < sizeof(lampen); i++) {
+  for (int i = 0; i < sizeof(lampen); i++)
+  {
     digitalWrite(lampen[i], LOW);
   }
 }
@@ -27,7 +28,8 @@ void AllesDunkel() {
 
 // Schaltet alle Lampen auf HIGH
 void AllesLeuchtet() {
-  for (int i = 0; i < sizeof(lampen); i++) {
+  for (int i = 0; i < sizeof(lampen); i++)
+  {
     digitalWrite(lampen[i], HIGH);
   }
 }
@@ -37,30 +39,43 @@ void StarteLampen() {
 }
 
 void setup() {
+  Serial.begin(9600);
   // put your setup code here, to run once:
   pinMode(taster, INPUT_PULLUP);
-  for (int i = 0; i < sizeof(lampen); i++) {
+  for (int i = 0; i < sizeof(lampen); i++)
+  {
     pinMode(lampen[i], OUTPUT);
     digitalWrite(lampen[i], LOW);
   }
 }
 
 void loop() {
-  if (digitalRead(taster) == LOW && alle_an == false) {
+  if (digitalRead(taster) == LOW)
+  {
     // Taste gedrückt
-    //  AllesDunkel();
-    alle_an = true;
+    Serial.print("Taste gedrueckt! Alter Status: ") ; Serial.print(alle_an);
+    // Status toggeln
+    alle_an = !alle_an;
+    //    if (alle_an == false)
+    //    {
+    //      alle_an = true;
+    //    }
+    //    else
+    //    {
+    //      alle_an = false;
+    //    }
+    Serial.print(" => Neuer Status:  "); Serial.println(alle_an);
+    // Taster entprellen
+    delay(200);
   }
 
-  if (digitalRead(taster) == HIGH) {
-    // Taste gedrückt
-    alle_an = false;
-  }
-
-  if (alle_an == true) {
+  if (alle_an == true)
+  {
     // Lampen leuchten
     AllesLeuchtet();
-  }     else {
+  }
+  else
+  {
     // Lampen sind aus
     AllesDunkel();
   }
