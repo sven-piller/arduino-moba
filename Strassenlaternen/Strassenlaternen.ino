@@ -42,8 +42,7 @@ int defekteLampeFlackerzeit;
 
 // Bootstrapping
 void setup() {
-  Serial.begin(9600);
-  // put your setup code here, to run once:
+  // Serial.begin(9600);
   pinMode(TASTER_PIN, INPUT_PULLUP);
 
   for (int i = 0; i < LAMPEN_ANZAHL; i++) {
@@ -51,30 +50,26 @@ void setup() {
     digitalWrite(LAMPEN_PINS[i], LAMPE_AUS);
   }
 
-  // Fürs debugging
-  // sind_die_lampen_an = true;
-  // schalteAllesAn();
 }
 
 // Programmlogik
 void loop() {
 
   if (digitalRead(TASTER_PIN) == TASTER_GEDRUECKT) {
-    Serial.print("Taste gedrueckt! ");
+    // Serial.print("Taste gedrueckt! ");
 
-    // Status toggeln
     if (sind_die_lampen_an == true) {
-      Serial.println("An => Aus");
+      // Serial.println("An => Aus");
       loescheLampen();
     } else {
-      Serial.println("Aus => An");
+      // Serial.println("Aus => An");
 
       randomSeed(analogRead(0) + millis());
-      int defektSchwelle = random(0, 100);
-      Serial.print("Defekte Lampe wenn > 50: ");
-      Serial.println(defektSchwelle);
+      int defektWahrscheinlichkeit = random(0, 100);
+      // Serial.print("Defekte Lampe wenn > 50: ");
+      // Serial.println(defektWahrscheinlichkeit);
 
-      if (defektSchwelle > 50) {
+      if (defektWahrscheinlichkeit > 50) {
         defekteLampeVorhanden = true;
         bestimmeDefekteLampe();
         _printDefekteLampe();
@@ -86,7 +81,7 @@ void loop() {
     }
 
     // Taster entprellen
-    delay(400);
+    delay(50);
   }
 
   if (sind_die_lampen_an == true) {
@@ -172,19 +167,19 @@ void betreibeFlackerndeLampe() {
   angehen.
 */
 void starteLampen() {
-  Serial.println("Anschalten beginnt");
+  // Serial.println("Anschalten beginnt");
 
   for (int i = 0; i < 100; i++) {
     randomSeed(analogRead(0) + millis());
     int einschaltIndex = random(0, LAMPEN_ANZAHL);
-    int einschaltDelay = random(10, 50);    
+    int einschaltDelay = random(10, 50);
     delay(einschaltDelay);
     byte einschaltWahrscheinlichkeit = random(0, 8);
 
     if (einschaltWahrscheinlichkeit > 0) {
       digitalWrite(LAMPEN_PINS[einschaltIndex], LAMPE_AN);
-      Serial.print("Lampe eingeschaltet: ");
-      Serial.println(LAMPEN_PINS[einschaltIndex]);
+      // Serial.print("Lampe eingeschaltet: ");
+      // Serial.println(LAMPEN_PINS[einschaltIndex]);
     }
     else {
       digitalWrite(LAMPEN_PINS[einschaltIndex], LAMPE_AUS);
@@ -194,7 +189,7 @@ void starteLampen() {
   }
 
   sind_die_lampen_an = true;
-  Serial.println("Anschalten fertig");
+  // Serial.println("Anschalten fertig");
   betreibeLampen();
 }
 
@@ -205,7 +200,7 @@ void starteLampen() {
   Reihenfolge ausgehen.
 */
 void loescheLampen() {
-  Serial.println("Abschalten beginnt");
+  // Serial.println("Abschalten beginnt");
 
   bool neueZahl;
   int ausschaltReihenfolge[LAMPEN_ANZAHL];
@@ -233,17 +228,17 @@ void loescheLampen() {
     randomSeed(analogRead(0) + millis());
     int ausschaltDelay = random(100, 200);
     delay(ausschaltDelay);
-    Serial.println(ausschaltDelay);
+    // Serial.println(ausschaltDelay);
     digitalWrite(LAMPEN_PINS[ausschaltReihenfolge[ausschaltIndex]], LAMPE_AUS);
-    Serial.print(ausschaltReihenfolge[ausschaltIndex]);
-    Serial.print(":");
-    Serial.print(LAMPEN_PINS[ausschaltReihenfolge[ausschaltIndex]]);
-    Serial.print("Lampe ausgeschaltet: ");
-    Serial.println(LAMPEN_PINS[ausschaltReihenfolge[ausschaltIndex]]);
+    // Serial.print(ausschaltReihenfolge[ausschaltIndex]);
+    // Serial.print(":");
+    // Serial.print(LAMPEN_PINS[ausschaltReihenfolge[ausschaltIndex]]);
+    // Serial.print("Lampe ausgeschaltet: ");
+    // Serial.println(LAMPEN_PINS[ausschaltReihenfolge[ausschaltIndex]]);
   }
 
   sind_die_lampen_an = false;
-  Serial.println("Abschalten fertig");
+  // Serial.println("Abschalten fertig");
 }
 
 // Defekte Lampe bestimmen
@@ -255,10 +250,10 @@ void bestimmeDefekteLampe() {
 
 // Debugausgaben für die Defekte Lampe
 void _printDefekteLampe() {
-  Serial.print("Defekte Lampe: #");
-  Serial.print(defekteLampeIndex);
-  Serial.print(" => Lampe ");
-  Serial.print(LAMPEN_PINS[defekteLampeIndex]);
-  Serial.print(": ");
-  Serial.println(defekteLampePin);
+  // Serial.print("Defekte Lampe: #");
+  // Serial.print(defekteLampeIndex);
+  // Serial.print(" => Lampe ");
+  // Serial.print(LAMPEN_PINS[defekteLampeIndex]);
+  // Serial.print(": ");
+  // Serial.println(defekteLampePin);
 }
