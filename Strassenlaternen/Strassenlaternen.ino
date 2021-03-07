@@ -50,6 +50,10 @@ void setup() {
     pinMode(LAMPEN_PINS[i], OUTPUT);
     digitalWrite(LAMPEN_PINS[i], LAMPE_AUS);
   }
+
+  // Fürs debugging
+  // sind_die_lampen_an = true;
+  // schalteAllesAn();
 }
 
 // Programmlogik
@@ -61,8 +65,7 @@ void loop() {
     // Status toggeln
     if (sind_die_lampen_an == true) {
       Serial.println("An => Aus");
-      sind_die_lampen_an = false;
-      schalteAllesDunkel();
+      loescheLampen();
     } else {
       Serial.println("Aus => An");
 
@@ -174,7 +177,8 @@ void starteLampen() {
   for (int i = 0; i < 100; i++) {
     randomSeed(analogRead(0) + millis());
     int einschaltIndex = random(0, LAMPEN_ANZAHL);
-    int einschaltDelay = random(10, 50);
+    int einschaltDelay = random(10, 50);    
+    delay(einschaltDelay);
     byte einschaltWahrscheinlichkeit = random(0, 8);
 
     if (einschaltWahrscheinlichkeit > 0) {
@@ -186,13 +190,9 @@ void starteLampen() {
       digitalWrite(LAMPEN_PINS[einschaltIndex], LAMPE_AUS);
     }
 
-    delay(einschaltDelay);
-
-    if (i == 99) {
-      schalteAllesAn();
-    }
 
   }
+
   sind_die_lampen_an = true;
   Serial.println("Anschalten fertig");
   betreibeLampen();
@@ -201,10 +201,49 @@ void starteLampen() {
 /*
   Lösche die Lampen aus
 
-  Die Lampen sollen etwas versetzt ausgehen.
+  Die Lampen sollen etwas versetzt in zufälliger
+  Reihenfolge ausgehen.
 */
 void loescheLampen() {
+  Serial.println("Abschalten beginnt");
 
+  bool neueZahl;
+  int ausschaltReihenfolge[LAMPEN_ANZAHL];
+
+  for (int i = 0; i < LAMPEN_ANZAHL; i++) {
+
+    do {
+      ausschaltReihenfolge[i] = int(random(0, LAMPEN_ANZAHL));
+      neueZahl = true;
+
+      for (int j = 0; j < i; j++) {
+
+        if (ausschaltReihenfolge[j] == ausschaltReihenfolge[i]) {
+          neueZahl = false;
+        }
+
+      }
+
+    } while (!neueZahl);
+
+  }
+
+
+  for (int ausschaltIndex = 0; ausschaltIndex < LAMPEN_ANZAHL; ausschaltIndex++) {
+    randomSeed(analogRead(0) + millis());
+    int ausschaltDelay = random(100, 200);
+    delay(ausschaltDelay);
+    Serial.println(ausschaltDelay);
+    digitalWrite(LAMPEN_PINS[ausschaltReihenfolge[ausschaltIndex]], LAMPE_AUS);
+    Serial.print(ausschaltReihenfolge[ausschaltIndex]);
+    Serial.print(":");
+    Serial.print(LAMPEN_PINS[ausschaltReihenfolge[ausschaltIndex]]);
+    Serial.print("Lampe ausgeschaltet: ");
+    Serial.println(LAMPEN_PINS[ausschaltReihenfolge[ausschaltIndex]]);
+  }
+
+  sind_die_lampen_an = false;
+  Serial.println("Abschalten fertig");
 }
 
 // Defekte Lampe bestimmen
@@ -214,9 +253,7 @@ void bestimmeDefekteLampe() {
   defekteLampePin = LAMPEN_PINS[defekteLampeIndex];
 }
 
-/*
-  Debugausgaben für die Defekte Lampe
-*/
+// Debugausgaben für die Defekte Lampe
 void _printDefekteLampe() {
   Serial.print("Defekte Lampe: #");
   Serial.print(defekteLampeIndex);
