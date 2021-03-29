@@ -7,6 +7,7 @@
   2. Alle Lampen gehen zufällig mit leichten Schwankungen an.
   3. Alle Lamepen leuchten permanent, eine hat Probleme und flackert ab und zu
   4. Auf Tastendruck werden sie wieder ausgeschaltet
+  5. Wenn das Programm aktiv ist, wird das per LED angezeigt
 
   2021-03-05
   Sven Piller
@@ -14,25 +15,30 @@
   Mit Ideen von:
   - https://www.domsmoba.de/arduino/8-leucht-stofflampen/
 
+  Historie:
+  - v1: 2021-03-28 Erste Version für die Anlage
+
 */
 
 // Ausgänge mit angeschlossenen LED-Straßenlampen
-const byte  LAMPEN_PINS[] = {6, 8, 9, 10, 13};
+const byte LAMPEN_PINS[10] = {3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 // Anzahl der Lampen
-const byte LAMPEN_ANZAHL =  sizeof(LAMPEN_PINS); //5
+const byte LAMPEN_ANZAHL = 10;
 const byte LAMPE_AN = HIGH;
 const byte LAMPE_AUS = LOW;
 
 // Taster zum Ein-/Ausschalten
-const byte  TASTER_PIN = 2;
+const byte TASTER_PIN = 2;
 // Kosmetische Konstante
 const byte TASTER_GEDRUECKT = LOW;
+// LED Anzeige, ob Programm aktiv ist
+const byte INDICATOR_LED_PIN = 13;
 
 // Aktueller Zustand der Lampen
 bool sind_die_lampen_an = false;
 
 // Gibt es im aktuellen Zustand eine defekte Lampe
-bool defekteLampeVorhanden  = false;
+bool defekteLampeVorhanden = false;
 // Pin der defekten Lampe
 byte defekteLampePin;
 // Index der defekten Lampe im lampen-Array
@@ -44,6 +50,8 @@ int defekteLampeFlackerzeit;
 void setup() {
   // Serial.begin(9600);
   pinMode(TASTER_PIN, INPUT_PULLUP);
+  pinMode(INDICATOR_LED_PIN, OUTPUT);
+  digitalWrite(INDICATOR_LED_PIN, LOW);
 
   for (int i = 0; i < LAMPEN_ANZAHL; i++) {
     pinMode(LAMPEN_PINS[i], OUTPUT);
@@ -61,8 +69,10 @@ void loop() {
     if (sind_die_lampen_an == true) {
       // Serial.println("An => Aus");
       loescheLampen();
+      digitalWrite(INDICATOR_LED_PIN, LOW);
     } else {
       // Serial.println("Aus => An");
+      digitalWrite(INDICATOR_LED_PIN, HIGH);
 
       randomSeed(analogRead(0) + millis());
       int defektWahrscheinlichkeit = random(0, 100);
@@ -85,9 +95,11 @@ void loop() {
   }
 
   if (sind_die_lampen_an == true) {
+    digitalWrite(INDICATOR_LED_PIN, HIGH);
     betreibeLampen();
   } else {
     schalteAllesDunkel();
+    digitalWrite(INDICATOR_LED_PIN, LOW);
   }
 
 }
