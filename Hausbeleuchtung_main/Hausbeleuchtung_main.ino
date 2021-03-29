@@ -12,6 +12,9 @@
   2021-03-26
   Sven Piller
 
+  Mit Ideen von:
+  - http://ediy.com.my/blog/item/87-using-74hc595-shift-registers-with-arduino
+
   Historie:
   - v1: 2021-03-28 Erste Version für die Anlage
 
@@ -51,7 +54,7 @@ const byte TASTER_PIN = 2;
 const byte TASTER_GEDRUECKT = LOW;
 // LED Anzeige, ob Programm aktiv ist
 const byte INDICATOR_LED_PIN = 13;
-// Ausgang für nachrangige Arduinos.
+// Ausgang für nachrangige Arduinos
 const byte CLIENT_PIN = 7;
 
 // Aktueller Zustand der Lampen
@@ -116,11 +119,11 @@ void lampen_aus()
 // Schaltet alle Leuchten der Reihe nach ein
 void lampen_an()
 {
-  for (int col = 0; col < LEUCHTEN_ANZAHL; col++)
+  for (int i = 0; i < LEUCHTEN_ANZAHL; i++)
   {
     digitalWrite(LATCH_PIN, LOW);
-    shiftOut(DATA_PIN, CLOCK_PIN, MSBFIRST, (LEUCHTEN_PATTERN[col] >> 8)); //shift out highbyte
-    shiftOut(DATA_PIN, CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN[col]);        //shift out lowbyte
+    shiftOut(DATA_PIN, CLOCK_PIN, MSBFIRST, (LEUCHTEN_PATTERN[i] >> 8)); //shift out highbyte
+    shiftOut(DATA_PIN, CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN[i]);        //shift out lowbyte
     digitalWrite(LATCH_PIN, HIGH);
     delay(200);
   }
