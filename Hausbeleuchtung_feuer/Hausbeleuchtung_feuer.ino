@@ -39,20 +39,20 @@ unsigned char LEUCHTEN_PATTERN_AN = B00111111;       // alle
 unsigned char LEUCHTEN_PATTERN_AN_FEUER = B00111111; // alle ohne brennendes Haus
 
 // Anschlüsse des 74HC595
-int LATCH_PIN = 4; // ST_CP
-int CLOCK_PIN = 5; // SH_CP
-int DATA_PIN = 6;  // DS
+int IC2_LATCH_PIN = 4; // ST_CP
+int IC2_CLOCK_PIN = 5; // SH_CP
+int IC2_DATA_PIN = 6;  // DS
 
 // Taster zum Ein-/Ausschalten
-const byte TASTER_PIN = 2;
+const byte TASTER_DEAD_PIN = 2;
 const byte TASTER_GEDRUECKT = LOW;
 // Eingang für vorangigen Arduino bzgl. Hausbeleuchtung
-const byte MAIN_PIN = 7;
+const byte CONNEX_N2_PIN = 7;
 
 // Taster zum Ein-/Ausschalten
-const byte TASTER_FEUER_PIN = 8;
+const byte TASTER2_PIN = 8;
 // LED Anzeige, ob Programm aktiv ist
-const byte INDICATOR_LED_PIN = 13;
+const byte TASTER2_LED_PIN = 13;
 // Pins für das Relais, welches den Rauchtopf und das Brandflackern steuert
 const byte RELAIS_ZUSTAND1_PIN = 9;
 const byte RELAIS_ZUSTAND2_PIN = 10;
@@ -66,19 +66,19 @@ bool ist_das_feuer_an = false;
 void setup()
 {
   // Serial.begin(9600);
-  pinMode(TASTER_PIN, INPUT_PULLUP);
-  pinMode(MAIN_PIN, INPUT);
-  pinMode(LATCH_PIN, OUTPUT);
-  pinMode(CLOCK_PIN, OUTPUT);
-  pinMode(DATA_PIN, OUTPUT);
+  pinMode(TASTER_DEAD_PIN, INPUT_PULLUP);
+  pinMode(CONNEX_N2_PIN, INPUT);
+  pinMode(IC2_LATCH_PIN, OUTPUT);
+  pinMode(IC2_CLOCK_PIN, OUTPUT);
+  pinMode(IC2_DATA_PIN, OUTPUT);
 
-  pinMode(TASTER_FEUER_PIN, INPUT_PULLUP);
+  pinMode(TASTER2_PIN, INPUT_PULLUP);
   pinMode(RELAIS_ZUSTAND1_PIN, OUTPUT);
   digitalWrite(RELAIS_ZUSTAND1_PIN, LOW);
   pinMode(RELAIS_ZUSTAND2_PIN, OUTPUT);
   digitalWrite(RELAIS_ZUSTAND2_PIN, LOW);
-  pinMode(INDICATOR_LED_PIN, OUTPUT);
-  digitalWrite(INDICATOR_LED_PIN, LOW);
+  pinMode(TASTER2_LED_PIN, OUTPUT);
+  digitalWrite(TASTER2_LED_PIN, LOW);
 
   lampen_aus();
   feuer_aus();
@@ -87,19 +87,19 @@ void setup()
 void loop()
 {
   // Logik für die normale Hausbeleuchtung
-  if (digitalRead(MAIN_PIN) == HIGH && sind_die_lampen_an == false)
+  if (digitalRead(CONNEX_N2_PIN) == HIGH && sind_die_lampen_an == false)
   {
     lampen_an();
   }
 
-  if (digitalRead(MAIN_PIN) == LOW && sind_die_lampen_an == true)
+  if (digitalRead(CONNEX_N2_PIN) == LOW && sind_die_lampen_an == true)
   {
     lampen_aus();
   }
 
   // Logik für die lokale Hausbeleuchtung
   // TODO: Eventuell ausbauen
-  if (digitalRead(TASTER_PIN) == TASTER_GEDRUECKT)
+  if (digitalRead(TASTER_DEAD_PIN) == TASTER_GEDRUECKT)
   {
 
     if (sind_die_lampen_an == true)
@@ -116,7 +116,7 @@ void loop()
   }
 
   // Logik für das brennende Haus
-  if (digitalRead(TASTER_FEUER_PIN) == TASTER_GEDRUECKT)
+  if (digitalRead(TASTER2_PIN) == TASTER_GEDRUECKT)
   {
 
     if (ist_das_feuer_an == true)
@@ -149,9 +149,9 @@ void feuer_an()
   if (sind_die_lampen_an == true)
   {
     delay(3000);
-    digitalWrite(LATCH_PIN, LOW);
-    shiftOut(DATA_PIN, CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN_AN_FEUER);
-    digitalWrite(LATCH_PIN, HIGH);
+    digitalWrite(IC2_LATCH_PIN, LOW);
+    shiftOut(IC2_DATA_PIN, IC2_CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN_AN_FEUER);
+    digitalWrite(IC2_LATCH_PIN, HIGH);
   }
 }
 
@@ -171,18 +171,18 @@ void feuer_aus()
   if (sind_die_lampen_an == true)
   {
     delay(3000);
-    digitalWrite(LATCH_PIN, LOW);
-    shiftOut(DATA_PIN, CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN_AN);
-    digitalWrite(LATCH_PIN, HIGH);
+    digitalWrite(IC2_LATCH_PIN, LOW);
+    shiftOut(IC2_DATA_PIN, IC2_CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN_AN);
+    digitalWrite(IC2_LATCH_PIN, HIGH);
   }
 }
 
 // Schaltet alle Leuchten aus
 void lampen_aus()
 {
-  digitalWrite(LATCH_PIN, LOW);
-  shiftOut(DATA_PIN, CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN_AUS);
-  digitalWrite(LATCH_PIN, HIGH);
+  digitalWrite(IC2_LATCH_PIN, LOW);
+  shiftOut(IC2_DATA_PIN, IC2_CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN_AUS);
+  digitalWrite(IC2_LATCH_PIN, HIGH);
   sind_die_lampen_an = false;
   delay(500);
 }
@@ -192,14 +192,14 @@ void lampen_an()
 {
   for (int i = 0; i < LEUCHTEN_ANZAHL; i++)
   {
-    digitalWrite(LATCH_PIN, LOW);
-    shiftOut(DATA_PIN, CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN[i]);
-    digitalWrite(LATCH_PIN, HIGH);
+    digitalWrite(IC2_LATCH_PIN, LOW);
+    shiftOut(IC2_DATA_PIN, IC2_CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN[i]);
+    digitalWrite(IC2_LATCH_PIN, HIGH);
     delay(200);
   }
-  digitalWrite(LATCH_PIN, LOW);
-  shiftOut(DATA_PIN, CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN_AN);
-  digitalWrite(LATCH_PIN, HIGH);
+  digitalWrite(IC2_LATCH_PIN, LOW);
+  shiftOut(IC2_DATA_PIN, IC2_CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN_AN);
+  digitalWrite(IC2_LATCH_PIN, HIGH);
   sind_die_lampen_an = true;
   delay(200);
 }
