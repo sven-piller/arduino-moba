@@ -17,14 +17,14 @@
 
 const PROGMEM            //Pin Rail Side
 Rail_Cfg_T Rail_Cfg[] = {//Nr  Nr
-                          { 8, "3", 'L' },
+                          { 8, "12", 'L' },
 //                          { 9, "4", 'R' },   // Uncomment this lines to use 3 OLED pannels
 //                          {10, "5", 'L' },   // and add additional lines if more then 3 pannels are used
                         };
 
 // If the following two lines are enabled the displayed text will change randomly
-//#define RAND_CHANGE_MINTIME   20      // Minimal time between two display changes [s]
-//#define RAND_CHANGE_MAXTIME   60      // Maximal time between two display changes [s]
+#define RAND_CHANGE_MINTIME   20      // Minimal time between two display changes [s]
+#define RAND_CHANGE_MAXTIME   60      // Maximal time between two display changes [s]
 
 #define LED_HEARTBEAT_PIN       13      // Define the pin for the heartbeat LED.
 
@@ -32,6 +32,6 @@ Rail_Cfg_T Rail_Cfg[] = {//Nr  Nr
 
 #define USE_DCC                 0       // FLASH Usage: 4014 (13%), RAM 70 Byte  02.02.19:
 
-#define USE_U8G2LIB             1       // Use the new u8g2 library (If changed restart the IDE or open the library manager to rebuild all)
+#define USE_U8G2LIB             0       // Use the new u8g2 library (If changed restart the IDE or open the library manager to rebuild all)
 
 #define  _PRINT_DEBUG_MESSAGES  0       // Set to 1 to print debug messages
