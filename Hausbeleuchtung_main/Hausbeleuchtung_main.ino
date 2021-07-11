@@ -96,8 +96,8 @@ void loop()
     {
       // Serial.println("Aus => An");
       digitalWrite(CONNEX_N2_PIN, HIGH);
-      lampen_an();
       digitalWrite(TASTER1_LED_PIN, HIGH);
+      lampen_an();
     }
 
     // Taster entprellen

@@ -141,7 +141,7 @@ void loop()
 */
 void feuer_an()
 {
-
+  digitalWrite(TASTER2_LED_PIN, HIGH);
   relais_ein();
   ist_das_feuer_an = true;
   delay(200);
@@ -167,6 +167,7 @@ void feuer_aus()
   relais_aus();
   ist_das_feuer_an = false;
   delay(200);
+  digitalWrite(TASTER2_LED_PIN, LOW);
 
   if (sind_die_lampen_an == true)
   {
