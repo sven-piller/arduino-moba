@@ -30,15 +30,18 @@
 const PROGMEM char Text_Messages[] =
 //    uhrzeit      zugnummer     ziel                  zuglauf1                  zuglauf2                  wagenstand   lauftext  1         2         3         4         5         6         7         8         9        10
 //    "12345"      "1234567"     "1234567890123456"    "12345678901234567890"    "12345678901234567890"    "1234567"    "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890
-   SL "22:24"   NE "ICE 153"  NE "Mainz Hbf"        NE "Schlier \374ber"      NE " Karlsruhe nach"      NE "-222F--" NE "+++ Unwetterwarnung +++ "
-   SL "09:34"   NE "RB 1521"  NE "Aschaffenburg"    NE "Gro\337auheim - Kahl" NE "- Gro\337krotzenburg" NE "   2121" NE ""
-   SL "10:04"   NE "RB 3237"  NE "Plattling"        NE "Freising - Moosburg"  NE "- Landshut"           NE ""        NE ""
-   SL "12:53"   NE "EC 172"   NE "Hamburg - Altona" NE "Berlin Hbf - "        NE "Hamburg Hbf"          NE "-222211" NE "Heute ca. 10 Min. sp\344ter"
-   SL "15:21"   NE "ICE 592"  NE "Berlin Ostbf"     NE "Fulda - Kassel -"     NE "Braunschweig Hbf"     NE "11111"   NE ""
-   SL "17:02"   NE "IC 602"   NE "Puttgarden"       NE "Wuppertal - Dortmund" NE "Bremen - Hamburg"     NE " 22111"  NE ""
-   SL "18:30"   NE "RE 7"     NE "Kiel / Flensburg" NE "Elmshorn -"           NE "Neum\374nster"        NE "   2121" NE "Zugteilung in Neum\374nster - Vorderer Zugteil f\344hrt bis Flensburg"
-   SL G934      NE "Hg-Exp"   NE "Hogsmeade"        NE "King's Cross"         NE "- nonstop -"          NE "-------" NE "Hogwarts-Express"
-   SL "21:45"   NE "ICE 651"  NE "Leipzig Hbf"      NE "Fulda - Eisenach"     NE ""                     NE ""        NE "Achtung: Heute auf Gleis 7"
- //  SL "#LDiese Zeile verp\344ndert nur den Lauftext"
+// SL "22:24"   NE "ICE 153"  NE "Mainz Hbf"        NE "Schlier \374ber"      NE " Karlsruhe nach"      NE "-222F--" NE "+++ Unwetterwarnung +++ "
+   SL "09:34"   NE "HLB2872"  NE "Aschaffenburg"    NE "Gro\337auheim - Kahl" NE "- Gro\337krotzenburg" NE "2122   " NE "" 
+// SL "09:34"   NE "HLB2872"  NE "Aschaffenburg"    NE "Gro\337auheim - Kahl" NE "- Gro\337krotzenburg" NE "2122   " NE "Heute ca. 10 Min. sp\344ter"
+   SL "#U09:34#LHeute ca. 10 Min. sp\344ter"
+   SL "09:47"    NE "HLB2873" NE "Wiesbaden Hbf"    NE "Darmstadt Hbf -"      NE "Mainz Hbf"            NE "   2122" NE ""
+// SL "10:04"   NE "RB 3237"  NE "Plattling"        NE "Freising - Moosburg"  NE "- Landshut"           NE ""        NE ""
+   SL "10:00"   NE "EC 172"   NE "Hamburg - Altona" NE "Berlin Hbf - "        NE "Hamburg Hbf"          NE "-222211" NE ""
+// SL "15:21"   NE "ICE 592"  NE "Berlin Ostbf"     NE "Fulda - Kassel -"     NE "Braunschweig Hbf"     NE "11111"   NE ""
+// SL "17:02"   NE "IC 602"   NE "Puttgarden"       NE "Wuppertal - Dortmund" NE "Bremen - Hamburg"     NE " 22111"  NE ""
+// SL "18:30"   NE "RE 7"     NE "Kiel / Flensburg" NE "Elmshorn -"           NE "Neum\374nster"        NE "   2121" NE "Zugteilung in Neum\374nster - Vorderer Zugteil f\344hrt bis Flensburg"
+// SL G934      NE "Hg-Exp"   NE "Hogsmeade"        NE "King's Cross"         NE "- nonstop -"          NE "-------" NE "Hogwarts-Express"
+// SL "21:45"   NE "ICE 651"  NE "Leipzig Hbf"      NE "Fulda - Eisenach"     NE ""                     NE ""        NE "Achtung: Heute auf Gleis 7"
+// SL "#LDiese Zeile verp\344ndert nur den Lauftext"
 
 ; // End of the Text_Messages string

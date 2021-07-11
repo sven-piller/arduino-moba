@@ -17,7 +17,7 @@
 
 
  ********************************************************
-   Arduino program to generate railway station displays
+  Arduino program to generate railway station displays
  ********************************************************
 
   This program is based the ideas and programs from Tobias, Klaus and Fredddy:
@@ -36,9 +36,9 @@
   - Uses the new u8g2lib to access the OLED panel
   - Faster screen update
   - Saving memory by
-   - using special fonts with only german "Umlauts"
-   - using PROGMEM
-   - optimizing the program
+    - using special fonts with only german "Umlauts"
+    - using PROGMEM
+    - optimizing the program
   - Serial port could be used to send the displays (Compatible to Fredddy's program)
 
   Several OLED panels
@@ -81,7 +81,7 @@
   Some additional commands have been added and a "short" mode has been added.
 
   Beispiel:
-   #LDas ist ein neuer Lauftext#
+    #LDas ist ein neuer Lauftext#
   definiert einen neuen Lauftext
   Die Felder haben folgende Kuerzel:
     L: Lauftext    (Maximal 100 Zeichen)
@@ -120,11 +120,11 @@
 
 
   Aufbau des Displays:
-     123456789012345678901234567
-     [<Lauftext>       ] <Abfahrt>
+      123456789012345678901234567
+      [<Lauftext>       ] <Abfahrt>
   <G> <zuglauf 1         ><zugNummer>
-     <zuglauf 2         >ABCDEFG
-     <Ziel              ><Wagenstand>
+      <zuglauf 2         >ABCDEFG
+      <Ziel              ><Wagenstand>
 
 
   Hardware:
@@ -139,13 +139,13 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~
   - Nur ein OLED kann Lauftext anzeigen
   - Active_OLED bestimmt das OLED welches mit Tastern, DCC Kommandos
-   oder serieller Schnittstelle angesprochen wird.
+    oder serieller Schnittstelle angesprochen wird.
   - Nur das Active_OLED kann einen Lauftext anzeigen dadurch braucht
-   man keinen Speicher fuer die anderen OLEDs.
+    man keinen Speicher fuer die anderen OLEDs.
   - Beim umschalten von einem auf das naechste OLED wird der Lauftext
-   im alten abgeschaltet
+    im alten abgeschaltet
   - Das aktive OLED wird nur bei einer Aenderung neu gezeichnet oder
-   wenn der Lauftext aktiviert ist.
+    wenn der Lauftext aktiviert ist.
 
 
   Attention:
@@ -171,38 +171,38 @@
   ToDo:
   ~~~~~
   - Einstellungen fuer Upload in Forum:
-   - _PRINT_DEBUG_MESSAGES 0
-   - Nur ein OLED
-   - Pruefen wie viele Text Messages moeglich sind  (03.02.19:  >130)
-   - Deutsche Umlaute ersetzen
-   - Schnellen Grafik Treiber aktivieren
-   - ProcState_Outside_Disp() deaktivieren wenn alles getestet ist
+    - _PRINT_DEBUG_MESSAGES 0
+    - Nur ein OLED
+    - Pruefen wie viele Text Messages moeglich sind  (03.02.19:  >130)
+    - Deutsche Umlaute ersetzen
+    - Schnellen Grafik Treiber aktivieren
+    - ProcState_Outside_Disp() deaktivieren wenn alles getestet ist
 
   - RAM sparen:
-   - 20 Leerzeichen am Anfang beim Lauftexts. Das wuerde auch die Display Updatezeit veringern
+    - 20 Leerzeichen am Anfang beim Lauftexts. Das wuerde auch die Display Updatezeit veringern
   - Abfahrtszeit aus Moba Uhr bestimmen
   - Ausgabe wird schneller wenn Leerzeichen uebersprungen werden
-   das sieht man mit dem Ossi bei der Laufschift. Es koennten vermutlich
-   6 ms von 60 ms gespart werden
+    das sieht man mit dem Ossi bei der Laufschift. Es koennten vermutlich
+    6 ms von 60 ms gespart werden
   - Programm aufraeumen (Verstreute Konstanten, Variablen, ...)
   - Gleis Nummer Zentriert darstellen
   - Weitere DCC Befehle
-   - Uhrzeit relativ zur Modelbahnzeit
+    - Uhrzeit relativ zur Modelbahnzeit
   - CAN Bus
 
   Notizen:
   ~~~~~~~~
   - Das Display gibt es auch ohne Platine: https://www.aliexpress.com/item/0-91-Inch-128x32-OLED-LCD-White-Display-Module-SPI-Series-SSD1306/32859420903.html?spm=2114.search0104.3.124.9ae71fd8F6M06v&ws_ab_test=searchweb0_0,searchweb201602_3_10320_10065_10068_10547_319_317_10548_10696_453_10084_454_10083_433_10618_431_10304_10307_10820_10821_537_10302_536_10902_10843_10059_10884_10887_100031_10319_321_322_10103,searchweb201603_6,ppcSwitch_0&algo_expid=d3e03323-63e4-4399-984e-81f3e7e31fa0-17&algo_pvid=d3e03323-63e4-4399-984e-81f3e7e31fa0&transAbTest=ae803_3
-   2W64284020BC 8
-   - Pin Namen und Abmessungen: https://www.aliexpress.com/item/0-91-0-91inch-White-OLED-Display-Module-OLED-Screen-Board-128x32-SSD1306/32787123531.html?spm=2114.10010108.1000014.4.33661312rWuNvP&gps-id=pcDetailBottomMoreOtherSeller&scm=1007.13338.80878.000000000000000&scm_id=1007.13338.80878.000000000000000&scm-url=1007.13338.80878.000000000000000&pvid=989eede7-35d8-466c-890d-cebdab413e79
-   - Chip: SSD1306
-   - Datenblatt (S.63 Anchluss): "..\SSD1306.pdf"
+    2W64284020BC 8
+    - Pin Namen und Abmessungen: https://www.aliexpress.com/item/0-91-0-91inch-White-OLED-Display-Module-OLED-Screen-Board-128x32-SSD1306/32787123531.html?spm=2114.10010108.1000014.4.33661312rWuNvP&gps-id=pcDetailBottomMoreOtherSeller&scm=1007.13338.80878.000000000000000&scm_id=1007.13338.80878.000000000000000&scm-url=1007.13338.80878.000000000000000&pvid=989eede7-35d8-466c-890d-cebdab413e79
+    - Chip: SSD1306
+    - Datenblatt (S.63 Anchluss): "..\SSD1306.pdf"
   - Bei der Original Version muss ein Befehl zum lesen von Texten immer mit einem '#' beginnen
-   und mit einem # beendet werden.
+    und mit einem # beendet werden.
       #LLauftext#
-   Zeichen ohne einleitenden '#' werden ignoriert.
-   - Bei den Kommandos '<', '>' und 'X' darf aber kein # kommen
-   - Das '#' Zeichen kann nicht im Text verwendet werden
+    Zeichen ohne einleitenden '#' werden ignoriert.
+    - Bei den Kommandos '<', '>' und 'X' darf aber kein # kommen
+    - Das '#' Zeichen kann nicht im Text verwendet werden
 
 
   Revision History:
@@ -237,26 +237,26 @@
 #if 0  // Change to 1 to compile the old program for tests
 #include "Old_Bahnsteiganzeige_73.h"
 /*
-   Der Sketch verwendet 18146 Bytes (59%) des Programmspeicherplatzes. Das Maximum sind 30720 Bytes.
-   Globale Variablen verwenden 1365 Bytes (66%) des dynamischen Speichers, 683 Bytes fuer lokale Variablen verbleiben. Das Maximum sind 2048 Bytes.
+    Der Sketch verwendet 18146 Bytes (59%) des Programmspeicherplatzes. Das Maximum sind 30720 Bytes.
+    Globale Variablen verwenden 1365 Bytes (66%) des dynamischen Speichers, 683 Bytes fuer lokale Variablen verbleiben. Das Maximum sind 2048 Bytes.
 
   Zugzielanzeiger_68.ino: (7 Anzeigen)
-   Der Sketch verwendet 16200 Bytes (52%) des Programmspeicherplatzes. Das Maximum sind 30720 Bytes.
-   Globale Variablen verwenden 1604 Bytes (78%) des dynamischen Speichers, 444 Bytes fuer lokale Variablen verbleiben. Das Maximum sind 2048 Bytes.
-   Wenig Arbeitsspeicher verfuegbar, es koennen Stabilitaetsprobleme auftreten.
+    Der Sketch verwendet 16200 Bytes (52%) des Programmspeicherplatzes. Das Maximum sind 30720 Bytes.
+    Globale Variablen verwenden 1604 Bytes (78%) des dynamischen Speichers, 444 Bytes fuer lokale Variablen verbleiben. Das Maximum sind 2048 Bytes.
+    Wenig Arbeitsspeicher verfuegbar, es koennen Stabilitaetsprobleme auftreten.
 
 */
 #else // New program
 /* 09.02.19:
-   Der Sketch verwendet 20782 Bytes (67%) des Programmspeicherplatzes. Das Maximum sind 30720 Bytes.
-   Globale Variablen verwenden 1500 Bytes (73%) des dynamischen Speichers, 548 Bytes fuer lokale Variablen verbleiben. Das Maximum sind 2048 Bytes.
+    Der Sketch verwendet 20782 Bytes (67%) des Programmspeicherplatzes. Das Maximum sind 30720 Bytes.
+    Globale Variablen verwenden 1500 Bytes (73%) des dynamischen Speichers, 548 Bytes fuer lokale Variablen verbleiben. Das Maximum sind 2048 Bytes.
 
   Big memory consumers: (Get_MemUsage.bat (must be adapted to the location of Bahnsteiganzeige_V3.ino.elf))
     1156 t u8g2_font_6x13B_t_german
     1122 t u8g2_font_tpss_t_german
     0952 t u8g2_font_5x8_t_german
     0792 t u8g2_font_4x6_t_german
-   =====
+    =====
     4022   Total = 13 %
 */
 
@@ -328,23 +328,20 @@ NmraDcc  Dcc;        // Instance of the NmraDcc class
 //              error: no 'void TwoWire::clearWireTimeoutFlag()
 //            It's working with 1.8.2
 
-U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g(U8G2_R0, SCL, SDA, U8X8_PIN_NONE); // All Boards without Reset of the Display
-
-// U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g(U8G2_R0, U8X8_PIN_NONE); // 55-60 ms update time, full frame buffer:       512 bytes RAM
-
-//  #if 1 // 0.87" Display (New U8g2 library required 2.27.6)                                                   // 03.09.20:
-//      U8G2_SSD1316_128X32_F_HW_I2C u8g(U8G2_R2, U8X8_PIN_NONE); // Für 0.87" Display full frame buffer
-//    //U8G2_SSD1316_128X32_F_HW_I2C u8g(U8G2_R0, U8X8_PIN_NONE); // Für 0.87" Display full frame buffer Rotate by 180 Deg
-//    //U8G2_SSD1316_128X32_1_HW_I2C u8g(U8G2_R2, U8X8_PIN_NONE); // Für 0.87" Display
-//  #else // 0.91" Display
-//      // Rotate by 180 Deg: U8G2_R2 (Normal: U8G2_R0)    See: https://github.com/olikraus/u8g2/wiki/u8g2setupc
-//      U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g(U8G2_R2, U8X8_PIN_NONE); // 55-60 ms update time, full frame buffer:       512 bytes RAM
-//    //U8G2_SSD1306_128X32_UNIVISION_2_HW_I2C u8g(U8G2_R2, U8X8_PIN_NONE); // 65-74 ms update time, 2 pages => 2* nextPage() 256 bytes RAM
-//    //U8G2_SSD1306_128X32_UNIVISION_1_HW_I2C u8g(U8G2_R2, U8X8_PIN_NONE); // 88-94 ms update time, 4 pages => 4* nextPage() 128 bytes RAM
-//  #endif
+#if 0 // 0.87" Display (New U8g2 library required 2.27.6)                                                   // 03.09.20:
+  U8G2_SSD1316_128X32_F_HW_I2C u8g(U8G2_R2, U8X8_PIN_NONE); // Für 0.87" Display full frame buffer
+  //U8G2_SSD1316_128X32_F_HW_I2C u8g(U8G2_R0, U8X8_PIN_NONE); // Für 0.87" Display full frame buffer Rotate by 180 Deg
+  //U8G2_SSD1316_128X32_1_HW_I2C u8g(U8G2_R2, U8X8_PIN_NONE); // Für 0.87" Display
+#else // 0.91" Display
+  // Rotate by 180 Deg: U8G2_R2 (Normal: U8G2_R0)    See: https://github.com/olikraus/u8g2/wiki/u8g2setupc
+  U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g(U8G2_R2, SCL, SDA, U8X8_PIN_NONE); // All Boards without Reset of the Display
+  //U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g(U8G2_R2, U8X8_PIN_NONE); // 55-60 ms update time, full frame buffer:       512 bytes RAM
+  //U8G2_SSD1306_128X32_UNIVISION_2_HW_I2C u8g(U8G2_R2, U8X8_PIN_NONE); // 65-74 ms update time, 2 pages => 2* nextPage() 256 bytes RAM
+  //U8G2_SSD1306_128X32_UNIVISION_1_HW_I2C u8g(U8G2_R2, U8X8_PIN_NONE); // 88-94 ms update time, 4 pages => 4* nextPage() 128 bytes RAM
+#endif
 #else // Old library
-U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE);
-// U8GLIB_SSD1306_128X32_2X u8g(U8G_I2C_OPT_NONE); // 2 pages  256 bytes RAM
+  U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE);
+  // U8GLIB_SSD1306_128X32_2X u8g(U8G_I2C_OPT_NONE); // 2 pages  256 bytes RAM
 #endif
 
 #include "Push_Button.h"
@@ -1163,7 +1160,7 @@ void setup()
 void loop()
 //************************************************************************************************************
 {
-  uint32_t EndWait = millis() + 80; // Screen update period [ms]. Important for the rolling text. (Minimum 55 ms)
+  uint32_t EndWait = millis() + 55; // Screen update period [ms]. Important for the rolling text. (Minimum 55 ms)
   // The original program (#73) had an update rate of 95 ms without delay
   // If the update rate is too high, the DCC commands are recognized worse
 

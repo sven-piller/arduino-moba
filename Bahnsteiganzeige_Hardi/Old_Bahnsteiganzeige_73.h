@@ -1,9 +1,10 @@
 #include <U8glib.h>
 
 
-U8GLIB_SSD1306_128X32_2X u8g(U8G_I2C_OPT_NONE);
+// U8GLIB_SSD1306_128X32_2X u8g(U8G_I2C_OPT_NONE);
+U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE);
 
-String gleis = "GGG";
+String gleis = " 1 ";
 char lauftext[121];
 char uhrzeit[6];
 char zugnummer[8];
@@ -121,18 +122,26 @@ void draw()
     u8g.drawStr(128 - (6 * gleis.length()), 13, gleis.c_str());
   }
 
-  //u8g.setColorIndex(1);
-  // u8g.drawFrame(0, 0, 128, 32); // Test
+  // Trennung
+  u8g.setColorIndex(1);
+  u8g.drawLine(0,33,128,33);
+  u8g.drawLine(0,34,128,34);
+
+  // Nächste Züge
+  u8g.setFont(u8g_font_4x6); // 4x6
+  u8g.drawStr(0, 44 + u8g.getFontDescent(), "10:00 ICE 123  Berlin Hbf");
+  u8g.drawStr(0, 54 + u8g.getFontDescent(), "11:00 RB 75    Wiesbaden Hbf");
+  u8g.drawStr(0, 64 + u8g.getFontDescent(), "12:00 RB 75    Aschaffenburg Hbf");
 }
 
 void initializeStrings()
 {
-  String("Zuglauf 1  Zuglauf 1").toCharArray(zuglauf1, 21);
-  String("Zuglauf 2  Zuglauf 2").toCharArray(zuglauf2, 21);
-  String("Ziel   Ziel").toCharArray(ziel, 21);
-  String("Abfah").toCharArray(uhrzeit, 6);
-  String("Zugnumm").toCharArray(zugnummer, 8);
-  String("                    +++ Lauftext +++ Lauftext +++ Lauftext +++ Lauftext +++ Lauftext +++ Lauftext ++").toCharArray(lauftext, 101);;
+  String("Gro\337auheim - Kahl").toCharArray(zuglauf1, 21);
+  String("- Gro\337krotzenburg").toCharArray(zuglauf2, 21);
+  String("Aschaffenburg").toCharArray(ziel, 21);
+  String("09:34").toCharArray(uhrzeit, 6);
+  String("HLB2872").toCharArray(zugnummer, 8);
+  // String("                    +++ Lauftext +++ Lauftext +++ Lauftext +++ Lauftext +++ Lauftext +++ Lauftext ++").toCharArray(lauftext, 101);;
 }
 
 void setup()
@@ -385,5 +394,3 @@ void loop() {
     }
   }
 }
-
-

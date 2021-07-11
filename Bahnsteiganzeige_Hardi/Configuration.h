@@ -15,9 +15,9 @@
 #define RESET_DISP_PIN          A1      // Reset PIN for the OLED Displays if used with Hardis OLED Adapter
 #define UNUSED_AIN_PIN          A3      // This analog input is used to generate a random initial value for the random() function
 
-const PROGMEM            //Pin Rail Side
-Rail_Cfg_T Rail_Cfg[] = {//Nr  Nr
-                          { 8, "12", 'L' },
+const PROGMEM              //Pin Rail Side
+Rail_Cfg_T Rail_Cfg[] = {  //Nr  Nr
+                            { 8, "1", 'L' },
 //                          { 9, "4", 'R' },   // Uncomment this lines to use 3 OLED pannels
 //                          {10, "5", 'L' },   // and add additional lines if more then 3 pannels are used
                         };

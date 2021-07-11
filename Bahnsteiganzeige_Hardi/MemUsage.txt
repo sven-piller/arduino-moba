@@ -4,7 +4,7 @@
 00000952 t u8g2_font_5x8_t_german
 00000930 T Write_Display_to_OLED()
 00000792 t u8g2_font_4x6_t_german
-00000779 t Text_Messages
+00000779 t 4
 00000690 T Process_Character(char)
 00000676 T ExternalInterruptHandler()
 00000604 T __vector_24
