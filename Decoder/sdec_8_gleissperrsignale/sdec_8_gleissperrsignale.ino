@@ -19,6 +19,7 @@
   - v1: 2021-03-28 Erste Version für die Anlage
 
 */
+#include <MaerklinMotorola.h>
 
 // Anzahl der Leuchten
 const byte LEUCHTEN_ANZAHL = 16;
@@ -29,10 +30,8 @@ unsigned int LEUCHTEN_PATTERN_ACTIVE;
 unsigned int ALLE_SIGNALE_ROT = 0B0101010101010101;  // alle rot
 
 // Taster zum Ein-/Ausschalten
-const byte TASTER1_PIN = 2;
+const byte TASTER1_PIN = 3;
 const byte TASTER_GEDRUECKT = LOW;
-// LED Anzeige, ob Programm aktiv ist
-const byte TASTER1_LED_PIN = 13;
 
 // Anschlüsse des 74HC595
 int IC1_LATCH_PIN = 4; // ST_CP
@@ -40,8 +39,22 @@ int IC1_CLOCK_PIN = 5; // SH_CP
 int IC1_DATA_PIN = 6;  // DS
 
 
+#define INPUT_PIN 2
+volatile MaerklinMotorola mm(INPUT_PIN);
+
 #define PIN_ROT_OFS    0
 #define PIN_GRUEN_OFS  1
+
+#define S1_ADDRESS 25
+#define S2_ADDRESS 26
+#define S3_ADDRESS 27
+#define S4_ADDRESS 28
+#define S5_ADDRESS 29
+#define S6_ADDRESS 30
+#define S7_ADDRESS 31
+#define S8_ADDRESS 32
+
+
 
 int counter = 0;
 
@@ -180,9 +193,15 @@ int HP1 = 1;
 void setup()
 {
   Serial.begin(9600);
-  pinMode(TASTER1_PIN, INPUT_PULLUP);
-  pinMode(TASTER1_LED_PIN, OUTPUT);
-  digitalWrite(TASTER1_LED_PIN, LOW);
+
+  attachInterrupt(digitalPinToInterrupt(INPUT_PIN), isr, CHANGE);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+
+  TCCR1A = 0;
+  TCCR1B = 0;
+  bitSet(TCCR1B, CS12);  // 256 prescaler
+  bitSet(TIMSK1, TOIE1); // timer overflow interrupt
 
   pinMode(IC1_LATCH_PIN, OUTPUT);
   pinMode(IC1_CLOCK_PIN, OUTPUT);
@@ -194,48 +213,85 @@ void setup()
 // Programmlogik
 void loop()
 {
-  if (digitalRead(TASTER1_PIN) == TASTER_GEDRUECKT)
-  {
-    counter++;
-    // Serial.println("Taste gedrueckt! ");
-    Serial.print("Counter: ");
-    Serial.print(counter);
-
-    int rest = counter % 2;
-
-    Serial.print(" / Rest: ");
-    Serial.println(rest );
-
-    if (counter % 2 == HP0) {
-      Serial.println("HP0");
-      S1->switchTo(HP0);
-      S2->switchTo(HP0);
-      S3->switchTo(HP0);
-      S4->switchTo(HP0);
-      S5->switchTo(HP0);
-      S6->switchTo(HP0);
-      S7->switchTo(HP0);
-      S8->switchTo(HP0);
-      Serial.println(LEUCHTEN_PATTERN_ACTIVE, BIN);
-
-    } else {
-      Serial.println("HP1");
-      S1->switchTo(HP1);
-      S2->switchTo(HP1);
-      S3->switchTo(HP1);
-      S4->switchTo(HP1);
-      S5->switchTo(HP1);
-      S6->switchTo(HP1);
-      S7->switchTo(HP1);
-      S8->switchTo(HP1);
-      Serial.println(LEUCHTEN_PATTERN_ACTIVE, BIN);
-
+  mm.Parse();
+  MaerklinMotorolaData* Data = mm.GetData();
+  if (Data) {
+    if (Data->IsMagnet && Data->MagnetState) {
+      DEBUG("Decoder # " + String(Data->PortAddress) + " Switch " + (Data->DecoderState));
+      if (Data->PortAddress == S1_ADDRESS) {
+        if (Data->DecoderState == MM2DecoderState_Red) {
+          S1->switchTo(HP0);
+        }
+        else if (Data->DecoderState == MM2DecoderState_Green) {
+          S1->switchTo(HP1);
+        }
+      }
+      if (Data->PortAddress == S2_ADDRESS) {
+        if (Data->DecoderState == MM2DecoderState_Red) {
+          S2->switchTo(HP0);
+        }
+        else if (Data->DecoderState == MM2DecoderState_Green) {
+          S2->switchTo(HP1);
+        }
+      }
+      if (Data->PortAddress == S3_ADDRESS) {
+        if (Data->DecoderState == MM2DecoderState_Red) {
+          S3->switchTo(HP0);
+        }
+        else if (Data->DecoderState == MM2DecoderState_Green) {
+          S3->switchTo(HP1);
+        }
+      }
+      if (Data->PortAddress == S4_ADDRESS) {
+        if (Data->DecoderState == MM2DecoderState_Red) {
+          S4->switchTo(HP0);
+        }
+        else if (Data->DecoderState == MM2DecoderState_Green) {
+          S4->switchTo(HP1);
+        }
+      }
+      if (Data->PortAddress == S5_ADDRESS) {
+        if (Data->DecoderState == MM2DecoderState_Red) {
+          S5->switchTo(HP0);
+        }
+        else if (Data->DecoderState == MM2DecoderState_Green) {
+          S5->switchTo(HP1);
+        }
+      }
+      if (Data->PortAddress == S6_ADDRESS) {
+        if (Data->DecoderState == MM2DecoderState_Red) {
+          S6->switchTo(HP0);
+        }
+        else if (Data->DecoderState == MM2DecoderState_Green) {
+          S6->switchTo(HP1);
+        }
+      }
+      if (Data->PortAddress == S7_ADDRESS) {
+        if (Data->DecoderState == MM2DecoderState_Red) {
+          S7->switchTo(HP0);
+        }
+        else if (Data->DecoderState == MM2DecoderState_Green) {
+          S7->switchTo(HP1);
+        }
+      }
+      if (Data->PortAddress == S8_ADDRESS) {
+        if (Data->DecoderState == MM2DecoderState_Red) {
+          S8->switchTo(HP0);
+        }
+        else if (Data->DecoderState == MM2DecoderState_Green) {
+          S8->switchTo(HP1);
+        }
+      }
     }
-
-    // Taster entprellen
     delay(50);
   }
 }
+
+
+void DEBUG(String message) {
+  Serial.println( String(millis()) + " [DEB]: " + message);
+}
+
 
 // Schaltet alle Signale auf Rot
 void alles_halt()
@@ -247,4 +303,17 @@ void alles_halt()
   digitalWrite(IC1_LATCH_PIN, HIGH);
 
   Serial.println(LEUCHTEN_PATTERN_ACTIVE, BIN);
+}
+
+void isr() {
+  mm.PinChange();
+}
+
+ISR(TIMER1_OVF_vect) {
+  /*if (hasNewData) {
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+    hasNewData = false;
+    } else {
+    digitalWrite(LED_BUILTIN, LOW);
+    }*/
 }
