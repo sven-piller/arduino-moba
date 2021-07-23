@@ -22,22 +22,13 @@
 #include <MaerklinMotorola.h>
 
 // Anzahl der Leuchten
-const byte LEUCHTEN_ANZAHL = 16;
-
-unsigned int LEUCHTEN_PATTERN_AUS = 0B0000000000000000; // aus
-unsigned int LEUCHTEN_PATTERN_AN = 0B1111111111111111;  // alle
-unsigned int LEUCHTEN_PATTERN_ACTIVE;
 unsigned int ALLE_SIGNALE_ROT = 0B0101010101010101;  // alle rot
-
-// Taster zum Ein-/Ausschalten
-const byte TASTER1_PIN = 3;
-const byte TASTER_GEDRUECKT = LOW;
+unsigned int SIGNALZUSTAND = ALLE_SIGNALE_ROT;
 
 // Anschlüsse des 74HC595
 int IC1_LATCH_PIN = 4; // ST_CP
 int IC1_CLOCK_PIN = 5; // SH_CP
 int IC1_DATA_PIN = 6;  // DS
-
 
 #define INPUT_PIN 2
 volatile MaerklinMotorola mm(INPUT_PIN);
@@ -45,19 +36,17 @@ volatile MaerklinMotorola mm(INPUT_PIN);
 #define PIN_ROT_OFS    0
 #define PIN_GRUEN_OFS  1
 
-#define S1_ADDRESS 25
-#define S2_ADDRESS 26
-#define S3_ADDRESS 27
-#define S4_ADDRESS 28
-#define S5_ADDRESS 29
-#define S6_ADDRESS 30
-#define S7_ADDRESS 31
-#define S8_ADDRESS 32
+#define GSP1_ADDRESS 25
+#define GSP2_ADDRESS 26
+#define GSP3_ADDRESS 27
+#define GSP4_ADDRESS 28
+#define GSP5_ADDRESS 29
+#define GSP6_ADDRESS 30
+#define GSP7_ADDRESS 31
+#define GSP8_ADDRESS 32
 
-
-
-int counter = 0;
-
+#define DIM 60
+#define EXP 2
 
 // Signal Pictures ///////////////////////////////////////////////
 class Picture {
@@ -71,25 +60,25 @@ class Picture {
     unsigned char offset;
 };
 
-class PicHp0 : public Picture {
+class PicSh0 : public Picture {
   public:
-    PicHp0(unsigned char ofs) : Picture(ofs) {}
+    PicSh0(unsigned char ofs) : Picture(ofs) {}
     void setLight(bool val) {
-      bitWrite(LEUCHTEN_PATTERN_ACTIVE, PIN_ROT_OFS + offset, val);
+      bitWrite(SIGNALZUSTAND, PIN_ROT_OFS + offset, val);
     }
     void putLight(bool val) {
-      bitWrite(LEUCHTEN_PATTERN_ACTIVE, PIN_ROT_OFS + offset, !val);
+      bitWrite(SIGNALZUSTAND, PIN_ROT_OFS + offset, !val);
     }
 };
 
-class PicHp1 : public Picture {
+class PicSh1 : public Picture {
   public:
-    PicHp1(unsigned char ofs) : Picture(ofs) {}
+    PicSh1(unsigned char ofs) : Picture(ofs) {}
     void setLight(bool val) {
-      bitWrite(LEUCHTEN_PATTERN_ACTIVE, PIN_GRUEN_OFS + offset, val);
+      bitWrite(SIGNALZUSTAND, PIN_GRUEN_OFS + offset, val);
     }
     void putLight(bool val) {
-      bitWrite(LEUCHTEN_PATTERN_ACTIVE, PIN_GRUEN_OFS + offset, !val);
+      bitWrite(SIGNALZUSTAND, PIN_GRUEN_OFS + offset, !val);
     }
 };
 
@@ -105,9 +94,6 @@ class Signal {
     void change(Picture* currPic, Picture* newPic);
 };
 
-#define DIM 60
-#define EXP 2
-
 void Signal::writePattern(unsigned int pattern) {
   //   Serial.println(pattern, BIN);
   digitalWrite(IC1_LATCH_PIN, LOW);
@@ -122,11 +108,11 @@ void Signal::dimm(Picture* currPic, Picture* newPic) // overlapped
   for (int dim = DIM; dim > 0; --dim) {
     currPic->putLight(LOW);
     newPic->putLight(HIGH);
-    writePattern(LEUCHTEN_PATTERN_ACTIVE);
+    writePattern(SIGNALZUSTAND);
     delayMicroseconds(pow(dim, EXP));
     currPic->putLight(dim != DIM);
     newPic->putLight(dim == DIM);
-    writePattern(LEUCHTEN_PATTERN_ACTIVE);
+    writePattern(SIGNALZUSTAND);
     delayMicroseconds(pow(DIM, EXP) - pow(dim, EXP));
   }
 }
@@ -135,14 +121,14 @@ void Signal::change(Picture* currPic, Picture* newPic) // overlapped
 {
   currPic->setLight(LOW);
   newPic->setLight(HIGH);
-  writePattern(LEUCHTEN_PATTERN_ACTIVE);
+  writePattern(SIGNALZUSTAND);
 }
 
 
 //-----------------------------------------------------------------
-class BlockSignal : public Signal {
+class SperrSignal : public Signal {
   public:
-    BlockSignal(unsigned char ofs);
+    SperrSignal(unsigned char ofs);
     void setTo(unsigned char index);
     void switchTo(unsigned char index);
   private:
@@ -150,16 +136,16 @@ class BlockSignal : public Signal {
     unsigned char currIndex;
 };
 
-BlockSignal::BlockSignal(unsigned char ofs)
+SperrSignal::SperrSignal(unsigned char ofs)
 {
-  picture[0] = new PicHp0(ofs);
-  picture[1] = new PicHp1(ofs);
+  picture[0] = new PicSh0(ofs);
+  picture[1] = new PicSh1(ofs);
   picture[0]->setLight(HIGH);
   picture[1]->setLight(LOW);
   currIndex = 0;
 }
 
-void BlockSignal::switchTo(unsigned char index)
+void SperrSignal::switchTo(unsigned char index)
 {
   if (currIndex != index) {
     index = index % 2;
@@ -168,7 +154,7 @@ void BlockSignal::switchTo(unsigned char index)
   }
 }
 
-void BlockSignal::setTo(unsigned char index)
+void SperrSignal::setTo(unsigned char index)
 {
   if (currIndex != index) {
     change(picture[currIndex], picture[index]);
@@ -176,18 +162,18 @@ void BlockSignal::setTo(unsigned char index)
   }
 }
 
-Signal* S1 = new BlockSignal(0);
-Signal* S2 = new BlockSignal(2);
-Signal* S3 = new BlockSignal(4);
-Signal* S4 = new BlockSignal(6);
-Signal* S5 = new BlockSignal(8);
-Signal* S6 = new BlockSignal(10);
-Signal* S7 = new BlockSignal(12);
-Signal* S8 = new BlockSignal(14);
+Signal* GSP1 = new SperrSignal(0);
+Signal* GSP2 = new SperrSignal(2);
+Signal* GSP3 = new SperrSignal(4);
+Signal* GSP4 = new SperrSignal(6);
+Signal* GSP5 = new SperrSignal(8);
+Signal* GSP6 = new SperrSignal(10);
+Signal* GSP7 = new SperrSignal(12);
+Signal* GSP8 = new SperrSignal(14);
 
 
-int HP0 = 0;
-int HP1 = 1;
+int SH0 = 0;
+int SH1 = 1;
 
 // Bootstrapping
 void setup()
@@ -207,7 +193,7 @@ void setup()
   pinMode(IC1_CLOCK_PIN, OUTPUT);
   pinMode(IC1_DATA_PIN, OUTPUT);
 
-  alles_halt();
+  init_Signale_Auf_Halt();
 }
 
 // Programmlogik
@@ -218,68 +204,68 @@ void loop()
   if (Data) {
     if (Data->IsMagnet && Data->MagnetState) {
       DEBUG("Decoder # " + String(Data->PortAddress) + " Switch " + (Data->DecoderState));
-      if (Data->PortAddress == S1_ADDRESS) {
+      if (Data->PortAddress == GSP1_ADDRESS) {
         if (Data->DecoderState == MM2DecoderState_Red) {
-          S1->switchTo(HP0);
+          GSP1->switchTo(SH0);
         }
         else if (Data->DecoderState == MM2DecoderState_Green) {
-          S1->switchTo(HP1);
+          GSP1->switchTo(SH1);
         }
       }
-      if (Data->PortAddress == S2_ADDRESS) {
+      if (Data->PortAddress == GSP2_ADDRESS) {
         if (Data->DecoderState == MM2DecoderState_Red) {
-          S2->switchTo(HP0);
+          GSP2->switchTo(SH0);
         }
         else if (Data->DecoderState == MM2DecoderState_Green) {
-          S2->switchTo(HP1);
+          GSP2->switchTo(SH1);
         }
       }
-      if (Data->PortAddress == S3_ADDRESS) {
+      if (Data->PortAddress == GSP3_ADDRESS) {
         if (Data->DecoderState == MM2DecoderState_Red) {
-          S3->switchTo(HP0);
+          GSP3->switchTo(SH0);
         }
         else if (Data->DecoderState == MM2DecoderState_Green) {
-          S3->switchTo(HP1);
+          GSP3->switchTo(SH1);
         }
       }
-      if (Data->PortAddress == S4_ADDRESS) {
+      if (Data->PortAddress == GSP4_ADDRESS) {
         if (Data->DecoderState == MM2DecoderState_Red) {
-          S4->switchTo(HP0);
+          GSP4->switchTo(SH0);
         }
         else if (Data->DecoderState == MM2DecoderState_Green) {
-          S4->switchTo(HP1);
+          GSP4->switchTo(SH1);
         }
       }
-      if (Data->PortAddress == S5_ADDRESS) {
+      if (Data->PortAddress == GSP5_ADDRESS) {
         if (Data->DecoderState == MM2DecoderState_Red) {
-          S5->switchTo(HP0);
+          GSP5->switchTo(SH0);
         }
         else if (Data->DecoderState == MM2DecoderState_Green) {
-          S5->switchTo(HP1);
+          GSP5->switchTo(SH1);
         }
       }
-      if (Data->PortAddress == S6_ADDRESS) {
+      if (Data->PortAddress == GSP6_ADDRESS) {
         if (Data->DecoderState == MM2DecoderState_Red) {
-          S6->switchTo(HP0);
+          GSP6->switchTo(SH0);
         }
         else if (Data->DecoderState == MM2DecoderState_Green) {
-          S6->switchTo(HP1);
+          GSP6->switchTo(SH1);
         }
       }
-      if (Data->PortAddress == S7_ADDRESS) {
+      if (Data->PortAddress == GSP7_ADDRESS) {
         if (Data->DecoderState == MM2DecoderState_Red) {
-          S7->switchTo(HP0);
+          GSP7->switchTo(SH0);
         }
         else if (Data->DecoderState == MM2DecoderState_Green) {
-          S7->switchTo(HP1);
+          GSP7->switchTo(SH1);
         }
       }
-      if (Data->PortAddress == S8_ADDRESS) {
+      if (Data->PortAddress == GSP8_ADDRESS) {
         if (Data->DecoderState == MM2DecoderState_Red) {
-          S8->switchTo(HP0);
+          GSP8->switchTo(SH0);
         }
         else if (Data->DecoderState == MM2DecoderState_Green) {
-          S8->switchTo(HP1);
+          GSP8->switchTo(SH1);
         }
       }
     }
@@ -294,26 +280,19 @@ void DEBUG(String message) {
 
 
 // Schaltet alle Signale auf Rot
-void alles_halt()
+void init_Signale_Auf_Halt()
 {
-  LEUCHTEN_PATTERN_ACTIVE = ALLE_SIGNALE_ROT;
+  SIGNALZUSTAND = ALLE_SIGNALE_ROT;
   digitalWrite(IC1_LATCH_PIN, LOW);
-  shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, (LEUCHTEN_PATTERN_ACTIVE >> 8)); //shift out highbyte
-  shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN_ACTIVE);        //shift out lowbyte
+  shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, (SIGNALZUSTAND >> 8)); //shift out highbyte
+  shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, SIGNALZUSTAND);        //shift out lowbyte
   digitalWrite(IC1_LATCH_PIN, HIGH);
 
-  Serial.println(LEUCHTEN_PATTERN_ACTIVE, BIN);
+  Serial.println(SIGNALZUSTAND, BIN);
 }
 
 void isr() {
   mm.PinChange();
 }
 
-ISR(TIMER1_OVF_vect) {
-  /*if (hasNewData) {
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
-    hasNewData = false;
-    } else {
-    digitalWrite(LED_BUILTIN, LOW);
-    }*/
-}
+ISR(TIMER1_OVF_vect) {}
