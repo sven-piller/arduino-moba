@@ -22,46 +22,159 @@
 
 // Anzahl der Leuchten
 const byte LEUCHTEN_ANZAHL = 16;
-unsigned int LEUCHTEN_PATTERN[LEUCHTEN_ANZAHL] = {
-  0B0000000000000001, // Bäckerei
-  0B0000000000000010, // Biker-Shop
-  0B0000000000000100, // Gästehaus
-  0B0000000000001000, // Leeres Geschäft (Reihenhaus)
-  0B0000000000010000, // Gelbes Reihenhaus
-  0B0000000000100000, // Blaues Reihenhaus
-  0B0000000001000000, // Spielwarengeschäft (Reihenhaus)
-  0B0000000010000000, // Haus mit Turm
-  0B0000000100000000, // Torhaus
-  0B0000001000000000, // Haus mit Treppenaufgang
-  0B0000010000000000, // Siedlungshaus
-  0B0000100000000000, // Stadthaus (gelb)
-  0B0001000000000000, // Kirche
-  0B0010000000000000, // Gerätehaus
-  0B0100000000000000, // Feuerwehr
-  0B1000000000000000, // Villa
 
-};
 unsigned int LEUCHTEN_PATTERN_AUS = 0B0000000000000000; // aus
 unsigned int LEUCHTEN_PATTERN_AN = 0B1111111111111111;  // alle
 unsigned int LEUCHTEN_PATTERN_ACTIVE;
-
-// Anschlüsse des 74HC595
-int IC1_LATCH_PIN = 4; // ST_CP
-int IC1_CLOCK_PIN = 5; // SH_CP
-int IC1_DATA_PIN = 6;  // DS
-
-int counter = 0;
+unsigned int ALLE_SIGNALE_ROT = 0B0101010101010101;  // alle rot
 
 // Taster zum Ein-/Ausschalten
 const byte TASTER1_PIN = 2;
 const byte TASTER_GEDRUECKT = LOW;
 // LED Anzeige, ob Programm aktiv ist
 const byte TASTER1_LED_PIN = 13;
-// Ausgang für nachrangige Arduinos
-const byte CONNEX_N2_PIN = 7;
 
-// Aktueller Zustand der Lampen
-bool sind_die_lampen_an = false;
+// Anschlüsse des 74HC595
+int IC1_LATCH_PIN = 4; // ST_CP
+int IC1_CLOCK_PIN = 5; // SH_CP
+int IC1_DATA_PIN = 6;  // DS
+
+
+#define PIN_ROT_OFS    0
+#define PIN_GRUEN_OFS  1
+
+int counter = 0;
+
+
+// Signal Pictures ///////////////////////////////////////////////
+class Picture {
+  public:
+    Picture(unsigned char ofs) {
+      offset = ofs;
+    }
+    virtual void setLight(bool val) {}
+    virtual void putLight(bool val) {}
+  protected:
+    unsigned char offset;
+};
+
+class PicHp0 : public Picture {
+  public:
+    PicHp0(unsigned char ofs) : Picture(ofs) {}
+    void setLight(bool val) {
+      bitWrite(LEUCHTEN_PATTERN_ACTIVE, PIN_ROT_OFS + offset, val);
+    }
+    void putLight(bool val) {
+      bitWrite(LEUCHTEN_PATTERN_ACTIVE, PIN_ROT_OFS + offset, !val);
+    }
+};
+
+class PicHp1 : public Picture {
+  public:
+    PicHp1(unsigned char ofs) : Picture(ofs) {}
+    void setLight(bool val) {
+      bitWrite(LEUCHTEN_PATTERN_ACTIVE, PIN_GRUEN_OFS + offset, val);
+    }
+    void putLight(bool val) {
+      bitWrite(LEUCHTEN_PATTERN_ACTIVE, PIN_GRUEN_OFS + offset, !val);
+    }
+};
+
+// Signals ///////////////////////////////////////////////////////
+class Signal {
+  public:
+    Signal() {}
+    virtual void setTo(unsigned char index);
+    virtual void switchTo(unsigned char index);
+  protected:
+    void writePattern(unsigned int pattern);
+    void dimm(Picture* currPic, Picture* newPic);
+    void change(Picture* currPic, Picture* newPic);
+};
+
+#define DIM 60
+#define EXP 2
+
+void Signal::writePattern(unsigned int pattern) {
+  //   Serial.println(pattern, BIN);
+  digitalWrite(IC1_LATCH_PIN, LOW);
+  shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, (pattern >> 8)); //shift out highbyte
+  shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, pattern);        //shift out lowbyte
+  digitalWrite(IC1_LATCH_PIN, HIGH);
+}
+
+
+void Signal::dimm(Picture* currPic, Picture* newPic) // overlapped
+{
+  for (int dim = DIM; dim > 0; --dim) {
+    currPic->putLight(LOW);
+    newPic->putLight(HIGH);
+    writePattern(LEUCHTEN_PATTERN_ACTIVE);
+    delayMicroseconds(pow(dim, EXP));
+    currPic->putLight(dim != DIM);
+    newPic->putLight(dim == DIM);
+    writePattern(LEUCHTEN_PATTERN_ACTIVE);
+    delayMicroseconds(pow(DIM, EXP) - pow(dim, EXP));
+  }
+}
+
+void Signal::change(Picture* currPic, Picture* newPic) // overlapped
+{
+  currPic->setLight(LOW);
+  newPic->setLight(HIGH);
+  writePattern(LEUCHTEN_PATTERN_ACTIVE);
+}
+
+
+//-----------------------------------------------------------------
+class BlockSignal : public Signal {
+  public:
+    BlockSignal(unsigned char ofs);
+    void setTo(unsigned char index);
+    void switchTo(unsigned char index);
+  private:
+    Picture *picture[2];
+    unsigned char currIndex;
+};
+
+BlockSignal::BlockSignal(unsigned char ofs)
+{
+  picture[0] = new PicHp0(ofs);
+  picture[1] = new PicHp1(ofs);
+  picture[0]->setLight(HIGH);
+  picture[1]->setLight(LOW);
+  currIndex = 0;
+}
+
+void BlockSignal::switchTo(unsigned char index)
+{
+  if (currIndex != index) {
+    index = index % 2;
+    dimm(picture[currIndex], picture[index]);
+    currIndex = index;
+  }
+}
+
+void BlockSignal::setTo(unsigned char index)
+{
+  if (currIndex != index) {
+    change(picture[currIndex], picture[index]);
+    currIndex = index;
+  }
+}
+
+Signal* S1 = new BlockSignal(0);
+Signal* S2 = new BlockSignal(2);
+Signal* S3 = new BlockSignal(4);
+Signal* S4 = new BlockSignal(6);
+Signal* S5 = new BlockSignal(8);
+Signal* S6 = new BlockSignal(10);
+Signal* S7 = new BlockSignal(12);
+Signal* S8 = new BlockSignal(14);
+
+
+int HP0 = 0;
+int HP1 = 1;
 
 // Bootstrapping
 void setup()
@@ -75,10 +188,7 @@ void setup()
   pinMode(IC1_CLOCK_PIN, OUTPUT);
   pinMode(IC1_DATA_PIN, OUTPUT);
 
-  pinMode(CONNEX_N2_PIN, OUTPUT);
-  digitalWrite(CONNEX_N2_PIN, LOW);
-
-  lampen_aus();
+  alles_halt();
 }
 
 // Programmlogik
@@ -86,66 +196,55 @@ void loop()
 {
   if (digitalRead(TASTER1_PIN) == TASTER_GEDRUECKT)
   {
+    counter++;
     // Serial.println("Taste gedrueckt! ");
     Serial.print("Counter: ");
-    Serial.println(counter);
+    Serial.print(counter);
 
-    if (counter == 0)
-    {
-      lampen_an();
-      counter++;
-    }
-    else if (counter == 16)
-    {
-      counter = 0;
-      lampen_aus();
-    }
-    else
-    {
-      if (counter < 16) {
-        bitWrite(LEUCHTEN_PATTERN_ACTIVE, counter, 0);
-      }
+    int rest = counter % 2;
+
+    Serial.print(" / Rest: ");
+    Serial.println(rest );
+
+    if (counter % 2 == HP0) {
+      Serial.println("HP0");
+      S1->switchTo(HP0);
+      S2->switchTo(HP0);
+      S3->switchTo(HP0);
+      S4->switchTo(HP0);
+      S5->switchTo(HP0);
+      S6->switchTo(HP0);
+      S7->switchTo(HP0);
+      S8->switchTo(HP0);
       Serial.println(LEUCHTEN_PATTERN_ACTIVE, BIN);
-      digitalWrite(IC1_LATCH_PIN, LOW);
-      shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, (LEUCHTEN_PATTERN_ACTIVE >> 8)); //shift out highbyte
-      shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN_ACTIVE);        //shift out lowbyte
-      digitalWrite(IC1_LATCH_PIN, HIGH);
-      counter++;
+
+    } else {
+      Serial.println("HP1");
+      S1->switchTo(HP1);
+      S2->switchTo(HP1);
+      S3->switchTo(HP1);
+      S4->switchTo(HP1);
+      S5->switchTo(HP1);
+      S6->switchTo(HP1);
+      S7->switchTo(HP1);
+      S8->switchTo(HP1);
+      Serial.println(LEUCHTEN_PATTERN_ACTIVE, BIN);
+
     }
 
     // Taster entprellen
-    delay(250);
+    delay(50);
   }
 }
 
-// Schaltet alle Leuchten aus
-void lampen_aus()
+// Schaltet alle Signale auf Rot
+void alles_halt()
 {
+  LEUCHTEN_PATTERN_ACTIVE = ALLE_SIGNALE_ROT;
   digitalWrite(IC1_LATCH_PIN, LOW);
-  shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, (LEUCHTEN_PATTERN_AUS >> 8)); //shift out highbyte
-  shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN_AUS);        //shift out lowbyte
+  shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, (LEUCHTEN_PATTERN_ACTIVE >> 8)); //shift out highbyte
+  shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN_ACTIVE);        //shift out lowbyte
   digitalWrite(IC1_LATCH_PIN, HIGH);
-  sind_die_lampen_an = false;
-  LEUCHTEN_PATTERN_ACTIVE = LEUCHTEN_PATTERN_AUS;
-  delay(500);
-}
 
-// Schaltet alle Leuchten der Reihe nach ein
-void lampen_an()
-{
-  for (int i = 0; i < LEUCHTEN_ANZAHL; i++)
-  {
-    digitalWrite(IC1_LATCH_PIN, LOW);
-    shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, (LEUCHTEN_PATTERN[i] >> 8)); //shift out highbyte
-    shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN[i]);        //shift out lowbyte
-    digitalWrite(IC1_LATCH_PIN, HIGH);
-    delay(200);
-  }
-  digitalWrite(IC1_LATCH_PIN, LOW);
-  shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, (LEUCHTEN_PATTERN_AN >> 8)); //shift out highbyte
-  shiftOut(IC1_DATA_PIN, IC1_CLOCK_PIN, MSBFIRST, LEUCHTEN_PATTERN_AN);        //shift out lowbyte
-  digitalWrite(IC1_LATCH_PIN, HIGH);
-  sind_die_lampen_an = true;
-  LEUCHTEN_PATTERN_ACTIVE = LEUCHTEN_PATTERN_AN;
-  delay(200);
+  Serial.println(LEUCHTEN_PATTERN_ACTIVE, BIN);
 }
